@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= title %></title>
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,400i|Roboto:500" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
+    <script src="https://cdn.socket.io/4.1.1/socket.io.min.js" integrity="sha384-cdrFIqe3RasCMNE0jeFG9xJHog/tgOVC1E9Lzve8LQN1g5WUHo0Kvk1mawWjxX7a" crossorigin="anonymous"></script>
+</head>
+<body class="is-boxed has-animations">
+    <div class="body-wrap boxed-container">
+
+        <main>
+            <section class="hero text-center">
+                <div class="container-sm">
+                    <div class="hero-inner">
+                        <h1 class="hero-title h2-mobile mt-0 is-revealing">Liste de tâches</h1>
+                        <p class="hero-paragraph is-revealing" id="tasks">
+
+                            <% tasks.forEach((task) => { %>
+                                <span><%= task.name %><button class="supp">Supprimer</button> <br> </span>
+                            <% }); %>
+
+                        </p>
+                        <div class="hero-form newsletter-form field field-grouped is-revealing">
+                            <div class="control control-expanded">
+                                <input class="input" type="text" name="task" placeholder="Votre tâche">
+                            </div>
+                            <div class="control">
+                                <a class="button button-primary button-block button-shadow" id="create-task" href="#">Créer une tâche</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <script>
+
+        var socket = io();
+
+        socket.on('TASKS-CREATED', (data) => {
+            console.log("NEW TASK HAS BEEN CREATED", data)
+
+            let task = document.createElement("span")
+            task.innerHTML = `${data.name} <br>`
+
+            document.querySelector('#tasks').appendChild(task)
+
+        })
+
+        window.addEventListener('DOMContentLoaded', () => {
+
+            document.querySelector("#create-task").addEventListener('click', () => {
+
+                let task = document.querySelector("input[name=task]").value
+
+                fetch("http://localhost:3000/tasks", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': "application/x-www-form-urlencoded"
+                    },
+                    body: `name=${task}&user_id=1`
+                })
+
+            })
+
+        })
+
+        socket.on('TASKS-DELETED', (data) => {
+            console.log("TASK HAS BEEN DELETED", data)
+
+            let task = document.getElementById("#tasks")
+
+        })
+
+        window.addEventListener('DOMContentLoaded', () => {
+
+        document.querySelector(".supp").addEventListener('click', () => {
+
+            let task = document.getElementById("#tasks")
+
+            fetch("http://localhost:3000/tasks/4", {
+                method: "DELETE",
+                headers: {
+                    'Content-Type': "application/x-www-form-urlencoded"
+                },
+                body: `name=task`
+            })
+
+        })
+
+})
+
+    </script>
+
+    <script src="/js/main.min.js"></script>
+</body>
+</html>
